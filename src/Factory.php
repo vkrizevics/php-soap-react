@@ -20,20 +20,20 @@ class Factory
         $this->browser = $browser;
     }
 
-    public function createClient($wsdl)
+    public function createClient($wsdl,   $streaming = false)
     {
         $that = $this;
 
-        return $this->browser->get($wsdl)->then(function (ResponseInterface $response) use ($that) {
-            return $that->createClientFromWsdl((string)$response->getBody());
+        return $this->browser->get($wsdl)->then(function (ResponseInterface $response) use ($that, $streaming) {
+            return $that->createClientFromWsdl((string)$response->getBody(), $streaming);
         });
     }
 
-    public function createClientFromWsdl($wsdlContents)
+    public function createClientFromWsdl($wsdlContents, $streaming = false)
     {
         $browser = $this->browser;
         $url     = 'data://text/plain;base64,' . base64_encode($wsdlContents);
 
-        return new Client($url, $browser);
+        return !$streaming ? new Client($url, $browser) : new ClientStreaming($url, $browser);
     }
 }
