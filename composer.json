@@ -1,13 +1,17 @@
 {
     "name": "clue/soap-react",
-    "description": "Simple, async SOAP webservice client library, built on top of ReactPHP",
-    "keywords": ["SOAP", "SoapClient", "WebService", "WSDL", "ReactPHP"],
-    "homepage": "https://github.com/clue/php-soap-react",
+    "description": "Simple, async (streaming) SOAP webservice client library, built on top of ReactPHP",
+    "keywords": ["SOAP", "SoapClient", "WebService", "WSDL", "ReactPHP", "Stream"],
+    "homepage": "https://github.com/vkrizevics/php-soap-react",
     "license": "MIT",
     "authors": [
         {
             "name": "Christian Lück",
             "email": "christian@lueck.tv"
+        },
+        {
+            "name"; "Valerijs Krizevics",
+            "email": "vkrizevics@gmail.com"
         }
     ],
     "autoload": {
