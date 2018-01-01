@@ -1,6 +1,10 @@
 <?php
 namespace Clue\React\Soap;
 
+
+use Clue\React\Buzz\Browser;
+use Clue\React\Soap\Client;
+use Psr\Http\Message\ResponseInterface;
 use React\Promise\Stream;
 
 
@@ -14,7 +18,7 @@ class ClientStreaming extends Client
 
     public function soapCall($name, $args)
     {
-        return Stream\unwrapReadable($this->soapCall($name, $args));
+        return Stream\unwrapReadable(parent::soapCall($name, $args));
     }
 
     public function handleResponse(ResponseInterface $response)

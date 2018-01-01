@@ -5,6 +5,8 @@ namespace Clue\React\Soap;
 use React\EventLoop\LoopInterface;
 use Clue\React\Buzz\Browser;
 use Psr\Http\Message\ResponseInterface;
+use Clue\React\Soap\Client;
+use Clue\React\Soap\ClientStreaming;
 
 class Factory
 {
