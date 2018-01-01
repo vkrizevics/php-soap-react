@@ -7,7 +7,6 @@ use Clue\React\Soap\Client;
 use Psr\Http\Message\ResponseInterface;
 use React\Promise\Stream;
 
-
 class ClientStreaming extends Client
 {
 
