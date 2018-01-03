@@ -8,6 +8,8 @@ use Psr\Http\Message\ResponseInterface;
 use Clue\React\Soap\Client;
 use Clue\React\Soap\ClientStreaming;
 
+use Prewk\XmlStringStreamer\Parser\ParserPipelinesEventDriven;
+
 class Factory
 {
     private $loop;
@@ -22,20 +24,20 @@ class Factory
         $this->browser = $browser;
     }
 
-    public function createClient($wsdl,   $streaming = false)
+    public function createClient($wsdl, $streaming = false, ParserPipelinesEventDriven $parser_pipelines = null)
     {
         $that = $this;
 
-        return $this->browser->get($wsdl)->then(function (ResponseInterface $response) use ($that, $streaming) {
-            return $that->createClientFromWsdl((string)$response->getBody(), $streaming);
+        return $this->browser->get($wsdl)->then(function (ResponseInterface $response) use ($that, $streaming, $parser_pipelines) {
+            return $that->createClientFromWsdl((string)$response->getBody(), $streaming, $parser_pipelines);
         });
     }
 
-    public function createClientFromWsdl($wsdlContents, $streaming = false)
+    public function createClientFromWsdl($wsdlContents, $streaming = false, ParserPipelinesEventDriven $parser_pipelines = null)
     {
         $browser = $this->browser;
         $url     = 'data://text/plain;base64,' . base64_encode($wsdlContents);
 
-        return !$streaming ? new Client($url, $browser) : new ClientStreaming($url, $browser);
+        return !$streaming ? new Client($url, $browser) : new ClientStreaming($url, $browser, null, null, $parser_pipelines);
     }
 }
