@@ -10,6 +10,8 @@ use React\Promise\Stream;
 class ClientStreaming extends Client implements EventEmitterInterface
 {
     use EventEmitterTrait;
+    
+    protected $parsers_pipelines;
 
     public function __construct($wsdl, Browser $browser, ClientEncoder $encoder = null, ClientDecoder $decoder = null, ParsersPipelinesEventDriven $parsers_pipelines = null)
     {
@@ -19,7 +21,10 @@ class ClientStreaming extends Client implements EventEmitterInterface
 
     public function soapCall($name, $args)
     {
-        $this->stream = Stream\unwrapReadable(parent::soapCall($name, $args))->on('data', ($this, 'emit'))->on('data',($this->parsers_pipelines, 'applyParsers'))->on('error', ($this, 'emit'))->on('end', ($this, 'emit'));
+        $this->stream = Stream\unwrapReadable(parent::soapCall($name, $args))
+            ->on('data', ($this, 'emit'))
+            ->on('data',($this->parsers_pipelines, 'applyParsers'))
+            ->on('error', ($this, 'emit'))->on('end', ($this, 'emit'));
          return $this;
     }
 
