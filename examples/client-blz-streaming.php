@@ -32,18 +32,19 @@ for($i = 0; $i < 10; $i++) :
 	{				
 	    $api = new Proxy($client);
 	    
-	    $api->getBank(array('blz' => $blz))
-                ->on('data', function($result){ echo 1;})
+	    $client->on('error', function ($e) use($i, $loop) 
+		{
+		    echo 'ERROR: ' . $i . $e->getMessage() . PHP_EOL;
+		})
+		->on('data', function($result){ echo $result;});
+	    
+	    $api->getBank(array('blz' => $blz));
+		
 		/*->on('details', function (array $nodes) use ($blz)
 		{
 		    echo 'Got '. print_r($nodes, 1) .' for '. $blz .'\r\n';
 		})
 		->on('plz', 'print_r')*/
-		->on('error', function (Exception $e) use($i, $loop) 
-		{
-		    echo 'ERROR: ' . $i . $e->getMessage() . PHP_EOL;
-		});
-;
 	});
 endfor;
 

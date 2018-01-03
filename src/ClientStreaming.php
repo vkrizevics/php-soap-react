@@ -23,18 +23,24 @@ class ClientStreaming extends Client implements EventEmitterInterface
         $this->parser_pipelines = !$parser_pipelines
 	    ? ParserPipelinesEventDriven::getInstance(array($this, 'emit'))
 	    : $parser_pipelines->setEventCallback(array($this, 'emit'));
-	print_r($this->parser_pipelines);
     }
 
     public function soapCall($name, $args)
     {
-        $this->stream = Stream\unwrapReadable(parent::soapCall($name, $args));
-	    //->on('data', function($chunk) { echo $chunk;}/*array($this, 'emit')*/);
-            //->on('data', array($this->parsers_pipelines, 'applyParsers'))
-            //->on('error', array($this, 'emit'))
-	    //->on('end', array($this, 'emit'));
+	$that = $this;
+        $this->stream = Stream\unwrapReadable(parent::soapCall($name, $args))
+	    ->on('data', function($chunk) use ($that) {$that->emit('data', array($result));})
+	    ->on('data', function($chunk) use ($that)
+	    {
+		$results = $this->parsers_pipelines->applyParsers($chunk);
+		array_walk($results, function($res, $event_name) use ($that) {
+		   $that->emit($event_name, $res);
+		});
+	    })
+	    ->on('error', function($result) use ($that) {$that->emit('error', array($result));})
+	    ->on('end', function($result) use ($that) {$that->emit('end', array($result));});
          
-	return $this->stream;
+	return $this;
     }
 
     public function handleResponse(ResponseInterface $response)
