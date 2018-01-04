@@ -42,10 +42,10 @@ class Client
             return $deferred->promise();
         }
 
-        return $this->browser->send($request)->then(
+        return $this->browser->send($request);/*->then(
             array($this, 'handleResponse'),
             array($this, 'handleError')
-        );
+        );*/
     }
 
     public function handleResponse(ResponseInterface $response)

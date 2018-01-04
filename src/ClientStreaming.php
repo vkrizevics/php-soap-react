@@ -28,8 +28,8 @@ class ClientStreaming extends Client implements EventEmitterInterface
     public function soapCall($name, $args)
     {
 	$that = $this;
-        $this->stream = Stream\unwrapReadable(parent::soapCall($name, $args))
-	    ->on('data', function($chunk) use ($that) {$that->emit('data', array($result));})
+        $this->stream = /*Stream\unwrapReadable*/(parent::soapCall($name, $args));/*
+	    ->on('data', function($chunk) use ($that) {$that->emit('data', array($chunk));})
 	    ->on('data', function($chunk) use ($that)
 	    {
 		$results = $this->parsers_pipelines->applyParsers($chunk);
@@ -39,12 +39,12 @@ class ClientStreaming extends Client implements EventEmitterInterface
 	    })
 	    ->on('error', function($result) use ($that) {$that->emit('error', array($result));})
 	    ->on('end', function($result) use ($that) {$that->emit('end', array($result));});
-         
+*/         
 	return $this;
     }
 
     public function handleResponse(ResponseInterface $response)
     {
-        return $response->getBody();
+        Stream\unwrapReadable($response->getBody())->on('data', 'print_r')->on('error', 'print_r');
     }
 }
