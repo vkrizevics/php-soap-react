@@ -36,8 +36,9 @@ class Factory
     public function createClientFromWsdl($wsdlContents, $streaming = false, ParserPipelinesEventDriven $parser_pipelines = null)
     {
         $browser = $this->browser;
+        $loop = $this->loop;
         $url     = 'data://text/plain;base64,' . base64_encode($wsdlContents);
 
-        return !$streaming ? new Client($url, $browser) : new ClientStreaming($url, $browser, null, null, $parser_pipelines);
+        return !$streaming ? new Client($url, $browser) : new ClientStreaming($url, $browser, null, null, $parser_pipelines, $loop);
     }
 }

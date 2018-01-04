@@ -10,6 +10,8 @@ use React\Promise\Stream;
 use Prewk\XmlStringStreamer\Parser\ParserPipelinesEventDriven;
 use Evenement\EventEmitterInterface;
 use Evenement\EventEmitterTrait;
+use React\Stream\Stream as ReactPhpStream;
+use React\EventLoop\Looplnterface;
 
 class ClientStreaming extends Client implements EventEmitterInterface
 {
@@ -17,34 +19,41 @@ class ClientStreaming extends Client implements EventEmitterInterface
     
     protected $parser_pipelines = null;
 
-    public function __construct($wsdl, Browser $browser, ClientEncoder $encoder = null, ClientDecoder $decoder = null, ParserPipelinesEventDriven $parser_pipelines = null)
+    public function __construct($wsdl, Browser $browser, ClientEncoder $encoder = null, ClientDecoder $decoder = null, ParserPipelinesEventDriven $parser_pipelines = null, \React\EventLoop\LoopInterface $loop = null)
     {
-        parent::__construct($wsdl, $browser, $encoder, $decoder);
+        parent::__construct($wsdl, $browser->withOptions(array('streaming' => true)), $encoder, $decoder);
         $this->parser_pipelines = !$parser_pipelines
-	    ? ParserPipelinesEventDriven::getInstance(array($this, 'emit'))
-	    : $parser_pipelines->setEventCallback(array($this, 'emit'));
+	    ? ParserPipelinesEventDriven::getInstance()
+	    : $parser_pipelines;
+        $this->loop = $loop;
     }
 
     public function soapCall($name, $args)
     {
 	$that = $this;
-        $this->stream = /*Stream\unwrapReadable*/(parent::soapCall($name, $args));/*
-	    ->on('data', function($chunk) use ($that) {$that->emit('data', array($chunk));})
-	    ->on('data', function($chunk) use ($that)
-	    {
-		$results = $this->parsers_pipelines->applyParsers($chunk);
-		array_walk($results, function($res, $event_name) use ($that) {
-		   $that->emit($event_name, $res);
+        $stream = Stream\unwrapReadable(parent::soapCall($name, $args))
+	    ->on('data', function($chunk) use ($that) {
+           $that->emit('data', array($chunk));
+
+		$results = $that->parser_pipelines->apply($chunk);
+		array_walk($results, function($res, $event_name) use ($that) {echo $res,$event_name;
+		   $that->emit($event_name, array($res));
 		});
 	    })
-	    ->on('error', function($result) use ($that) {$that->emit('error', array($result));})
-	    ->on('end', function($result) use ($that) {$that->emit('end', array($result));});
-*/         
-	return $this;
+	    ->on('error', function(\Exception $e) use ($that, $stream) 
+{
+    $that->emit('error', array($e));
+})
+	    ->on('end', function($result) use ($that, $stream)
+{
+    $that->emit('end', array($result));
+});
+     
+         	return $this;
     }
 
     public function handleResponse(ResponseInterface $response)
-    {
-        Stream\unwrapReadable($response->getBody())->on('data', 'print_r')->on('error', 'print_r');
+    {   
+        return $response->getBody();
     }
 }
