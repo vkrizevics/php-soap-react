@@ -4,7 +4,7 @@ use Clue\React\Soap\Factory;
 use Clue\React\Soap\Proxy;
 use Clue\React\Soap\Client;
 
-require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/../../../../vendor/autoload.php';
 
 $loop = React\EventLoop\Factory::create();
 $factory = new Factory($loop);

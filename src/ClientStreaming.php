@@ -36,7 +36,10 @@ class ClientStreaming extends Client implements EventEmitterInterface
            $that->emit('data', array($chunk));
 
 		$results = $that->parser_pipelines->apply($chunk);
-		array_walk($results, function($res, $event_name) use ($that) {echo $res,$event_name;
+		array_walk($results, function($res, $event_name) use ($that) {
+       if (!is_array($res)) {
+           $res = @simple_xml_loadstring($res);
+       }
 		   $that->emit($event_name, array($res));
 		});
 	    })
