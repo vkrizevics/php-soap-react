@@ -14,7 +14,7 @@ class Client
     private $wsdl;
     private $browser;
     private $encoder;
-    private $decoder;
+    protected $decoder;
 
     public function __construct($wsdl, Browser $browser, ClientEncoder $encoder = null, ClientDecoder $decoder = null)
     {
@@ -49,7 +49,7 @@ class Client
     }
 
     public function handleResponse(ResponseInterface $response)
-    { echo 1;
+    {
         return $this->decoder->decode((string)$response->getBody());
     }
 
