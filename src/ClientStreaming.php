@@ -23,36 +23,36 @@ class ClientStreaming extends Client implements EventEmitterInterface
     {
         parent::__construct($wsdl, $browser->withOptions(array('streaming' => true)), $encoder, $decoder);
         $this->parser_pipelines = !$parser_pipelines
-	    ? ParserPipelinesEventDriven::getInstance()
-	    : $parser_pipelines;
+			? ParserPipelinesEventDriven::getInstance()
+			: $parser_pipelines;
         $this->loop = $loop;
     }
 
     public function soapCall($name, $args)
     {
-	$that = $this;
+		$that = $this;
         $stream = Stream\unwrapReadable(parent::soapCall($name, $args))
 	    ->on('data', function($chunk) use ($that) {
            $that->emit('data', array($chunk));
 
-		$results = $that->parser_pipelines->apply($chunk);
+		$results = $that->parser_pipelines->apply($chunk); print_r($results);
 		array_walk($results, function($res, $event_name) use ($that) {
-       if (!is_array($res)) {
-           $res = @simple_xml_loadstring($res);
-       }
+			if (count($res) == 1) {
+				$res = simplexml_load_string(str_replace('ns1:', '', $res[0]));
+			}
 		   $that->emit($event_name, array($res));
 		});
 	    })
-	    ->on('error', function(\Exception $e) use ($that, $stream) 
-{
-    $that->emit('error', array($e));
-})
-	    ->on('end', function($result) use ($that, $stream)
-{
-    $that->emit('end', array($result));
-});
+	    ->on('error', function(\Exception $e) use ($that) 
+		{
+			$that->emit('error', array($e));
+		})
+	    ->on('end', function($result) use ($that)
+		{
+			$that->emit('end', array($result));
+		});
      
-         	return $this;
+        return $this;
     }
 
     public function handleResponse(ResponseInterface $response)
