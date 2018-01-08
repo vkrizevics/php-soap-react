@@ -34,7 +34,12 @@ class ClientStreaming extends Client implements EventEmitterInterface
         $stream = Stream\unwrapReadable(parent::soapCall($name, $args))
 	    ->on('data', function($chunk) use ($that) {
             $that->emit('data', array($chunk));
-            $that->body_received .= $chunk;
+			if (!isset($that->body_received)) {
+					$that->body_received = $chunk;
+			} else {
+					$that->body_received .= $chunk;
+			}
+			
             if (!isset($that->xml_version) && preg_match('/<?.+<soapenv:Body>/', $that->body_received, $matches))
             {
                 $that->xml_version = $matches[0];
@@ -43,7 +48,7 @@ class ClientStreaming extends Client implements EventEmitterInterface
 			$results = $that->parser_pipelines->apply($chunk);
 			array_walk($results, function($res, $event_name) use ($that) {
 				if (count($res) == 1) {
-					$res = $that->decoder->decode(str_replace('ns1:', '', $that->xml_version . '<tag>' . current((array)$res) .'</tag></soapenv:Body></soapenv:Envelope>'));
+					$res = $that->decoder->decode($that->xml_version . '<tag>' . preg_replace('=<(/{0,1})[^:>]+:=', '<$1', current((array)$res)) .'</tag></soapenv:Body></soapenv:Envelope>');
 				}
 		   	 $that->emit($event_name, array($res));
 			});
